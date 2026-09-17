@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopEase - Online Shopping</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f5f5f5;
+    color: #222;
+}
+
+header {
+    background: #222;
+    color: white;
+    padding: 18px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 26px;
+}
+
+nav button {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 20px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+nav button:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
+
+.section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button.action {
+    background: #222;
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+button.action:hover {
+    background: #444;
+}
+
+.message {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.product {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.product h3 {
+    margin-bottom: 10px;
+}
+
+.product p {
+    margin-bottom: 10px;
+}
+
+.price {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.total {
+    text-align: right;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #222;
+    color: white;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .products {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        padding: 18px 20px;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    nav button {
+        margin-left: 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>ShopEase</h1>
+
+    <nav>
+        <button onclick="showSection('home')">Home</button>
+        <button onclick="showSection('products')">Products</button>
+        <button onclick="showSection('cart')">
+            Cart (<span id="cartCount">0</span>)
+        </button>
+        <button onclick="showSection('login')" id="loginNav">Login</button>
+        <button onclick="logout()" id="logoutNav" class="hidden">Logout</button>
+    </nav>
+</header>
+
+<div class="container">
+
+    <section id="home" class="section">
+        <h2>Welcome to ShopEase</h2>
+        <p>Shop your favorite products easily and conveniently.</p>
+        <button class="action" onclick="showSection('products')">
+            Shop Now
+        </button>
+    </section>
+
+    <section id="login" class="section hidden">
+        <h2>Login</h2>
+
+        <input type="email" id="email" placeholder="Enter Email">
+        <br>
+
+        <input type="password" id="password" placeholder="Enter Password">
+        <br>
+
+        <button class="action" onclick="login()">Login</button>
+
+        <p id="loginMessage" class="message"></p>
+    </section>
+
+    <section id="products" class="section hidden">
+        <h2>Products</h2>
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search products..."
+            onkeyup="searchProducts()"
+        >
+
+        <div id="productList" class="products"></div>
+    </section>
+
+    <section id="cart" class="section hidden">
+        <h2>Shopping Cart</h2>
+
+        <div id="cartItems"></div>
+
+        <div id="cartTotal" class="total">
+            Total: ₹0
+        </div>
+
+        <button class="action" onclick="checkout()">
+            Checkout
+        </button>
+
+        <p id="checkoutMessage" class="message"></p>
+    </section>
+
+</div>
+
+<footer>
+    <p>ShopEase Online Shopping Website</p>
+</footer>
+
+<script>
+
+let products = [
+    {
+        id: 1,
+        name: "Wireless Mouse",
+        price: 799
+    },
+    {
+        id: 2,
+        name: "Mechanical Keyboard",
+        price: 2499
+    },
+    {
+        id: 3,
+        name: "Bluetooth Headphones",
+        price: 1999
+    }
+];
+
+let cart = [];
+let loggedIn = false;
+
+function showSection(sectionName) {
+
+    let sections = ["home", "login", "products", "cart"];
+
+    sections.forEach(function(section) {
+        document.getElementById(section).classList.add("hidden");
+    });
+
+    document.getElementById(sectionName).classList.remove("hidden");
+
+    if (sectionName === "products") {
+        displayProducts(products);
+    }
+
+    if (sectionName === "cart") {
+        displayCart();
+    }
+}
+
+function login() {
+
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
+    let message = document.getElementById("loginMessage");
+
+    if (email === "" || password === "") {
+        message.textContent = "Please enter email and password.";
+        return;
+    }
+
+    loggedIn = true;
+
+    message.textContent = "Login successful.";
+
+    document.getElementById("loginNav").classList.add("hidden");
+    document.getElementById("logoutNav").classList.remove("hidden");
+
+    setTimeout(function() {
+        showSection("products");
+    }, 800);
+}
+
+function logout() {
+
+    loggedIn = false;
+
+    document.getElementById("loginNav").classList.remove("hidden");
+    document.getElementById("logoutNav").classList.add("hidden");
+
+    showSection("home");
+}
+
+function displayProducts(productArray) {
+
+    let productList = document.getElementById("productList");
+
+    productList.innerHTML = "";
+
+    if (productArray.length === 0) {
+        productList.innerHTML = "<p>No products found.</p>";
+        return;
+    }
+
+    productArray.forEach(function(product) {
+
+        let productDiv = document.createElement("div");
+
+        productDiv.className = "product";
+
+        productDiv.innerHTML =
+            "<h3>" + product.name + "</h3>" +
+            "<p class='price'>₹" + product.price + "</p>" +
+            "<button class='action' onclick='addToCart(" + product.id + ")'>Add to Cart</button>";
+
+        productList.appendChild(productDiv);
+    });
+}
+
+function searchProducts() {
+
+    let searchValue =
+        document.getElementById("searchInput").value.toLowerCase();
+
+    let filteredProducts = products.filter(function(product) {
+
+        return product.name.toLowerCase().includes(searchValue);
+
+    });
+
+    displayProducts(filteredProducts);
+}
+
+function addToCart(productId) {
+
+    if (!loggedIn) {
+        alert("Please login before adding products to cart.");
+        showSection("login");
+        return;
+    }
+
+    let product = products.find(function(item) {
+        return item.id === productId;
+    });
+
+    if (product) {
+        cart.push(product);
+        displayCart();
+        updateCartCount();
+        alert(product.name + " added to cart.");
+    }
+}
+
+function displayCart() {
+
+    let cartItems = document.getElementById("cartItems");
+    let cartTotal = document.getElementById("cartTotal");
+
+    cartItems.innerHTML = "";
+
+    if (cart.length === 0) {
+
+        cartItems.innerHTML = "<p>Your cart is empty.</p>";
+        cartTotal.textContent = "Total: ₹0";
+
+        updateCartCount();
+
+        return;
+    }
+
+    let total = 0;
+
+    cart.forEach(function(product, index) {
+
+        total = total + product.price;
+
+        let item = document.createElement("div");
+
+        item.className = "cart-item";
+
+        item.innerHTML =
+            "<span>" +
+            product.name +
+            " - ₹" +
+            product.price +
+            "</span>" +
+            "<button class='action' onclick='removeFromCart(" +
+            index +
+            ")'>Remove</button>";
+
+        cartItems.appendChild(item);
+    });
+
+    cartTotal.textContent = "Total: ₹" + total;
+
+    updateCartCount();
+}
+
+function updateCartCount() {
+
+    document.getElementById("cartCount").textContent = cart.length;
+}
+
+function removeFromCart(index) {
+
+    cart.splice(index, 1);
+
+    displayCart();
+}
+
+function checkout() {
+
+    if (cart.length === 0) {
+
+        document.getElementById("checkoutMessage").textContent =
+            "Your cart is empty.";
+
+        return;
+    }
+
+    document.getElementById("checkoutMessage").textContent =
+        "Order placed successfully.";
+
+    cart = [];
+
+    displayCart();
+}
+
+displayProducts(products);
+updateCartCount();
+
+</script>
+
+</body>
+</html>
