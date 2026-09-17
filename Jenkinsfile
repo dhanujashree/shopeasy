@@ -17,6 +17,7 @@ pipeline {
 
         stage('Automated Testing') {
             steps {
+                bat '"C:\\Program Files\\Python313\\python.exe" -m pip install -r requirements.txt'
                 bat '"C:\\Program Files\\Python313\\python.exe" test_shopeasy.py'
             }
         }
