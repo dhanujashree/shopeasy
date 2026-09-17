@@ -13,6 +13,8 @@ options.add_argument("--window-size=1280,800")
 driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 10)
 
+report_file = "test-report.html"
+
 try:
     file_path = os.path.abspath("index.html")
     driver.get("file:///" + file_path.replace("\\", "/"))
@@ -91,7 +93,36 @@ try:
 
     assert driver.find_element(By.ID, "cartCount").text == "0"
 
+    with open(report_file, "w", encoding="utf-8") as report:
+        report.write("""
+<html>
+<head>
+<title>ShopEase Selenium Test Report</title>
+</head>
+<body>
+<h1>ShopEase Automated Test Report</h1>
+<p><b>Status:</b> PASSED</p>
+<p><b>Application:</b> ShopEase Online Shopping Website</p>
+<p><b>Test Tool:</b> Selenium WebDriver</p>
+<p><b>Browser:</b> Chrome Headless</p>
+<h2>Test Cases</h2>
+<ul>
+<li>Login functionality - PASSED</li>
+<li>Product count verification - PASSED</li>
+<li>Add product to cart - PASSED</li>
+<li>Cart count verification - PASSED</li>
+<li>Cart product verification - PASSED</li>
+<li>Remove product from cart - PASSED</li>
+<li>Final cart count verification - PASSED</li>
+</ul>
+<h2>Overall Result</h2>
+<p>All ShopEase automated tests passed successfully.</p>
+</body>
+</html>
+""")
+
     print("All ShopEase automated tests passed")
+    print("Test report generated: test-report.html")
 
 finally:
     driver.quit()
