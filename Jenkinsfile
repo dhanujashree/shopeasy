@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Code Integration') {
             steps {
                 git branch: 'main',
@@ -18,13 +17,13 @@ pipeline {
 
         stage('Automated Testing') {
             steps {
-                bat 'if exist index.html (echo Automated test passed) else (echo Automated test failed & exit /b 1)'
+                bat '"C:\\Program Files\\Python313\\python.exe" test_shopeasy.py'
             }
         }
 
         stage('Report Generation') {
             steps {
-                bat 'echo Test report generated successfully'
+                bat 'echo Automated Selenium test report generated'
             }
         }
 
