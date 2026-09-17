@@ -24,7 +24,8 @@ pipeline {
 
         stage('Report Generation') {
             steps {
-                bat 'echo Automated Selenium test report generated'
+                bat 'if exist test-report.html (echo Test report generated successfully) else (echo Test report not found & exit /b 1)'
+                archiveArtifacts artifacts: 'test-report.html', fingerprint: true
             }
         }
 
